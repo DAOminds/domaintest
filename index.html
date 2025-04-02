@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <title>Domänen-Netzwerk</title>
     <style>
-      body { margin: 0; overflow: hidden; }
+      body { margin: 0; overflow: hidden; background-color: #111; }
       canvas { display: block; }
       .label {
         position: absolute;
         color: white;
         font-family: sans-serif;
+        font-size: 14px;
         pointer-events: none;
       }
     </style>
@@ -20,13 +21,20 @@
       import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.155/examples/jsm/controls/OrbitControls.js';
 
       const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x111111);
+
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 10);
+
       const renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
       const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
 
+      // Domänen (Nodes)
       const nodes = [
         { name: 'Dienstplanung', position: new THREE.Vector3(-3, 0, 0) },
         { name: 'Verfügbarkeitsmodell', position: new THREE.Vector3(3, 0, 0) },
@@ -36,20 +44,12 @@
       const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x0077ff });
       const nodeGeometry = new THREE.SphereGeometry(0.5, 32, 32);
 
-      scene.background = new THREE.Color(0x111111);
-      camera.position.set(0, 0, 10);
-      camera.lookAt(0, 0, 0);
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-
-
       nodes.forEach(node => {
         const sphere = new THREE.Mesh(nodeGeometry, nodeMaterial);
         sphere.position.copy(node.position);
         scene.add(sphere);
 
+        // Label
         const div = document.createElement('div');
         div.className = 'label';
         div.innerHTML = node.name;
@@ -59,9 +59,10 @@
         node.sphere = sphere;
       });
 
+      // Beziehungen (Edges)
       const edges = [
-        [0, 1],
-        [2, 0],
+        [0, 1], // Dienstplanung ↔ Verfügbarkeitsmodell
+        [2, 0], // Patientenmanagement → Dienstplanung
       ];
 
       edges.forEach(([a, b]) => {
@@ -72,13 +73,12 @@
         scene.add(line);
       });
 
-      camera.position.z = 10;
-
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
         renderer.render(scene, camera);
 
+        // Position der Labels aktualisieren
         nodes.forEach(node => {
           const vector = node.position.clone().project(camera);
           const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
