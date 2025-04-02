@@ -16,7 +16,6 @@
   </head>
   <body>
     <script type="module">
-      scene.background = new THREE.Color(0x111111);
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155/build/three.module.js';
       import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.155/examples/jsm/controls/OrbitControls.js';
 
@@ -36,6 +35,15 @@
 
       const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x0077ff });
       const nodeGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+
+      scene.background = new THREE.Color(0x111111);
+      camera.position.set(0, 0, 10);
+      camera.lookAt(0, 0, 0);
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+
 
       nodes.forEach(node => {
         const sphere = new THREE.Mesh(nodeGeometry, nodeMaterial);
